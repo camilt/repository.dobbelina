@@ -89,25 +89,9 @@ def List(url, page=1):
     xbmcplugin.endOfDirectory(utils.addon_handle)
 
 
-@utils.url_dispatcher.register('282', ['url', 'name'], ['download'])
-def Playvid(url, name, download=0):
-    info = ''
-    listhtml = utils.getHtml('https://www.cam4.com/' + name)
-    listhtml = listhtml.replace('><','> <')
-    match = re.compile(r'<span class="desc">(.+?)</span>.*?(class="field.+?>(.+?)</|</li>)', re.DOTALL | re.IGNORECASE).findall(listhtml)
-    for desc, dummy, field in match:
-        info = info + "[B]" + desc + "[/B] " + field + "\n"
-    videourl = url
-    iconimage = xbmc.getInfoImage("ListItem.Thumb")
-    listitem = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
-    listitem.setInfo('video', {'Title': name, 'Genre': 'Cam4', 'Plot': info})
-    listitem.setProperty("IsPlayable","true")
-    if int(sys.argv[1]) == -1:
-       pl = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
-       pl.clear()
-       pl.add(videourl, listitem)
-       xbmc.Player().play(pl)
-    else:
-       listitem.setPath(str(videourl))
-       xbmcplugin.setResolvedUrl(utils.addon_handle, True, listitem)
-    if utils.addon.getSetting("dwnld_stream")=="true" or download==1: utils.dwnld_stream(videourl, name)
+
+@utils.url_dispatcher.register('282', ['url', 'name'], ['check', 'download'])
+def Playvid(url, name, check=False, download=0):
+    vp = utils.VideoPlayer(name)
+    vp.play_from_direct_link(url)
+
